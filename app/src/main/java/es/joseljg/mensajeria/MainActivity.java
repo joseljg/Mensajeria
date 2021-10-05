@@ -1,8 +1,13 @@
 package es.joseljg.mensajeria;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -16,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText edt_enviado1 = null;
     private TextView txt_recibido1 = null;
+    private ActivityResultLauncher<Intent> someActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +29,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         edt_enviado1 = (EditText) findViewById(R.id.edt_enviado1);
         txt_recibido1 = (TextView) findViewById(R.id.txt_recibido1);
+        //------------------------------------------------------------------------
+        someActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            // There are no request codes
+                            Intent data = result.getData();
+                            String texto = data.getStringExtra(segundoActivity.EXTRA_RESPUESTA2);
+                            txt_recibido1.setText(texto);
+                            edt_enviado1.setText("");
+                        }
+                    }
+                });
+        //------------------------------------------------------------------------
     }
 
     public void enviar(View view) {
@@ -31,9 +53,10 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_TEXTO1,texto);
         // startActivity(intent); // esta es la forma de enviar cosas sin esperar respuestas
         // quiero ahora iniciar un activity y esperar una respuesta
-        startActivityForResult(intent , PETICION1);
+        // startActivityForResult(intent , PETICION1);
+        someActivityResultLauncher.launch(intent);
     }
-
+/*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -47,4 +70,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    */
+
 }
